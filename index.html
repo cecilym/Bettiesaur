@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Web Audio Fun</title>
+  <!-- @reload -->
+</head>
+<style>
+  html,
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #333;
+  color: #555;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+#page-wrapper {
+  height: 100%;
+}
+
+#synth-pad {
+  float: left;
+  height: 100%;
+  background: #c5ddc7 url(bettiesaur.JPG);
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: 3.2% 0;
+}
+
+@media (min-width: 690px) {
+  #synth-pad {
+    background-position: 7% 0;
+  }
+}
+
+#synth-pad:hover {
+  cursor: crosshair;
+}
+
+h1 {
+  font-weight: normal;
+}
+
+p {
+  line-height: 1.8rem;
+}
+
+.clearfix {
+  *zoom: 1;
+}
+
+.clearfix:before,
+.clearfix:after {
+  display: table;
+  line-height: 0;
+  content: "";
+}
+
+.clearfix:after {
+  clear: both;
+}
+
+
+</style>
+<body>
+  <div id="page-wrapper">
+    <canvas id="synth-pad"></canvas>
+    </div>
+</body>
+<script>
+
+  document.ontouchstart = function(e){
+    e.preventDefault();
+  }
+
+  var SynthPad = (function() {
+  // Variables
+  var myCanvas;
+  var myAudioContext;
+  var oscillator;
+  var osc2;
+  var gainNode;
+
+  // Notes
+  var lowNote = 261.63; // C4
+  var highNote = 493.88; // B4
+
+  // Constructor
+  var SynthPad = function() {
+    myCanvas = document.getElementById('synth-pad');
+    // Make webkit browsers use the prefix-free version of AudioContext.
+    var AudioContext = AudioContext || webkitAudioContext;
+    // Actually create the context.
+    myAudioContext = new AudioContext();
+    SynthPad.setupEventListeners();
+  };
+
+  // Event Listeners
+  SynthPad.setupEventListeners = function() {
+
+    // Disables scrolling on touch devices
+    document.body.addEventListener('touchmove', function(event) {
+      event.preventDefault();
+    }, false);
+
+    myCanvas.addEventListener('mousedown', SynthPad.playSound);
+    myCanvas.addEventListener('touchstart', SynthPad.playSound);
+
+    myCanvas.addEventListener('mouseup', SynthPad.stopSound);
+    document.addEventListener('mouseleave', SynthPad.stopSound);
+    myCanvas.addEventListener('touchend', SynthPad.stopSound);
+  };
+
+  // Play a note
+  SynthPad.playSound = function(event) {
+    oscillator = myAudioContext.createOscillator();
+    osc2 = myAudioContext.createOscillator();
+    gainNode = myAudioContext.createGainNode();
+
+    oscillator.type = 'triangle';
+    SynthPad.updateFrequency(event);
+
+    oscillator.connect(myAudioContext.destination);
+    oscillator.start(0);
+
+    gainNode.gain.value = 100;
+    gainNode.connect(oscillator.frequency);
+
+    osc2.frequency.value = 5;
+    osc2.connect(gainNode);
+    osc2.start(0);
+
+    myCanvas.addEventListener('mousemove', SynthPad.updateFrequency);
+    myCanvas.addEventListener('touchmove', SynthPad.updateFrequency);
+
+    myCanvas.addEventListener('mouseout', SynthPad.stopSound);
+  };
+
+  // Stop the audio
+  SynthPad.stopSound = function(event) {
+    oscillator.stop(0);
+    myCanvas.removeEventListener('mousemove', SynthPad.updateFrequency);
+    myCanvas.removeEventListener('touchmove', SynthPad.updateFrequency);
+    myCanvas.removeEventListener('mouseout', SynthPad.stopSound);
+  };
+
+  // Calculate note frequency
+  SynthPad.calculateNote = function(posX, posY) {
+    var noteDifference = highNote - lowNote;
+    var noteOffset = (noteDifference / myCanvas.offsetWidth) * (posX - myCanvas.offsetLeft) + (posY / -4);
+    return lowNote + noteOffset;
+  };
+
+  // Fetch new frequency and volume
+  SynthPad.calculateFrequency = function(x, y) {
+    var noteValue = SynthPad.calculateNote(x, y);
+    oscillator.frequency.value = noteValue;
+  };
+
+  // Update the note frequence
+  SynthPad.updateFrequency = function(event) {
+    if (event.type == 'mousedown' || event.type == 'mousemove') {
+      SynthPad.calculateFrequency(event.x, event.y);
+    } else if (event.type == 'touchstart' || event.type == 'touchmove') {
+      var touch = event.touches[0];
+      SynthPad.calculateFrequency(touch.pageX, touch.pageY);
+    }
+  };
+
+  // Export SynthPad
+  return SynthPad;
+
+})();
+
+// Initialize the page
+window.onload = function() {
+  var synthPad = new SynthPad();
+}
+
+// Might be a problem caused by the iphone hack to get audio playing, starting an oscillator, "Uncaught InvalidStateError: Failed to execute 'stop' on 'OscillatorNode': cannot call stop more than once." å
+
+</script>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

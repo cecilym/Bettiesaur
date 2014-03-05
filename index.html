@@ -91,9 +91,17 @@ p {
   var SynthPad = function() {
     myCanvas = document.getElementById('synth-pad');
     // Make webkit browsers use the prefix-free version of AudioContext.
-    var AudioContext = AudioContext || webkitAudioContext;
-    // Actually create the context.
-    myAudioContext = new AudioContext();
+    // var AudioContext = AudioContext || webkitAudioContext;
+    // Actually create the context
+    // myAudioContext = new AudioContext();
+
+    // Actually create the context
+    if (window.webkitAudioContext) {
+    myAudioContext = new webkitAudioContext();
+    } else if (window.AudioContext) {
+        myAudioContext = new AudioContext();
+    }
+
     SynthPad.setupEventListeners();
   };
 
@@ -134,13 +142,13 @@ p {
 
     myCanvas.addEventListener('mousemove', SynthPad.updateFrequency);
     myCanvas.addEventListener('touchmove', SynthPad.updateFrequency);
-
     myCanvas.addEventListener('mouseout', SynthPad.stopSound);
   };
 
   // Stop the audio
   SynthPad.stopSound = function(event) {
     oscillator.stop(0);
+    osc2.stop(0);
     myCanvas.removeEventListener('mousemove', SynthPad.updateFrequency);
     myCanvas.removeEventListener('touchmove', SynthPad.updateFrequency);
     myCanvas.removeEventListener('mouseout', SynthPad.stopSound);
@@ -179,7 +187,8 @@ window.onload = function() {
   var synthPad = new SynthPad();
 }
 
-// Might be a problem caused by the iphone hack to get audio playing, starting an oscillator, "Uncaught InvalidStateError: Failed to execute 'stop' on 'OscillatorNode': cannot call stop more than once." å
+// Might be a problem caused by the iphone hack to get audio playing, starting an oscillator, "Uncaught InvalidStateError: Failed to execute 'stop' on 'OscillatorNode': cannot call stop more than once." 
+// Currently experiencing bug that fails to stop with too many touches
 
 </script>
 </html>

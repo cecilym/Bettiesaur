@@ -129,7 +129,6 @@ p {
   // Play a note
   SynthPad.playSound = function(event) {
     if (singleTouchBool) {
-      console.log("In first touch playSound")
       oscillator = myAudioContext.createOscillator();
       osc2 = myAudioContext.createOscillator();
       osc2.frequency.value = 5;
@@ -154,7 +153,6 @@ p {
 
       
     } else {
-      console.log("In later touch playSound");
       // increase gain
       stopperGainNode.gain.value = 1.0;
     }
@@ -168,7 +166,6 @@ p {
 
   // Stop the audio by silencing it
   SynthPad.stopSound = function(event) {
-    console.log("stopSound");
     stopperGainNode.gain.value = 0;
   };
 

@@ -77,6 +77,8 @@ p {
     e.preventDefault();
   }
 
+  var singleTouchBool = true;
+
   var SynthPad = (function() {
   // Variables
   var myCanvas;
@@ -125,26 +127,29 @@ p {
 
   // Play a note
   SynthPad.playSound = function(event) {
-    oscillator = myAudioContext.createOscillator();
-    osc2 = myAudioContext.createOscillator();
-    gainNode = myAudioContext.createGainNode();
+    if (singleTouchBool) {
+      oscillator = myAudioContext.createOscillator();
+      osc2 = myAudioContext.createOscillator();
+      gainNode = myAudioContext.createGainNode();
 
-    oscillator.type = 'triangle';
-    SynthPad.updateFrequency(event);
+      oscillator.type = 'triangle';
+      SynthPad.updateFrequency(event);
 
-    oscillator.connect(myAudioContext.destination);
-    oscillator.start(0);
+      oscillator.connect(myAudioContext.destination);
+      oscillator.start(0);
 
-    gainNode.gain.value = 100;
-    gainNode.connect(oscillator.frequency);
+      gainNode.gain.value = 100;
+      gainNode.connect(oscillator.frequency);
 
-    osc2.frequency.value = 5;
-    osc2.connect(gainNode);
-    osc2.start(0);
+      osc2.frequency.value = 5;
+      osc2.connect(gainNode);
+      osc2.start(0);
 
-    myCanvas.addEventListener('mousemove', SynthPad.updateFrequency);
-    myCanvas.addEventListener('touchmove', SynthPad.updateFrequency);
-    myCanvas.addEventListener('mouseout', SynthPad.stopSound);
+      myCanvas.addEventListener('mousemove', SynthPad.updateFrequency);
+      myCanvas.addEventListener('touchmove', SynthPad.updateFrequency);
+      myCanvas.addEventListener('mouseout', SynthPad.stopSound);
+      singleTouchBool = false;
+    };
   };
 
   // Stop the audio
@@ -154,6 +159,7 @@ p {
     myCanvas.removeEventListener('mousemove', SynthPad.updateFrequency);
     myCanvas.removeEventListener('touchmove', SynthPad.updateFrequency);
     myCanvas.removeEventListener('mouseout', SynthPad.stopSound);
+    singleTouchBool = true;
   };
 
   // Calculate note frequency

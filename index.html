@@ -144,12 +144,14 @@ p {
       osc2.frequency.value = 5;
       osc2.connect(gainNode);
       osc2.start(0);
-
-      myCanvas.addEventListener('mousemove', SynthPad.updateFrequency);
-      myCanvas.addEventListener('touchmove', SynthPad.updateFrequency);
-      myCanvas.addEventListener('mouseout', SynthPad.stopSound);
       singleTouchBool = false;
-    };
+    } else {
+      // increase gain
+    }
+
+    myCanvas.addEventListener('mousemove', SynthPad.updateFrequency);
+    myCanvas.addEventListener('touchmove', SynthPad.updateFrequency);
+    myCanvas.addEventListener('mouseout', SynthPad.stopSound);
   };
 
   // Stop the audio
@@ -160,6 +162,7 @@ p {
     myCanvas.removeEventListener('touchmove', SynthPad.updateFrequency);
     myCanvas.removeEventListener('mouseout', SynthPad.stopSound);
     singleTouchBool = true;
+    // change to decreasing gain
   };
 
   // Calculate note frequency

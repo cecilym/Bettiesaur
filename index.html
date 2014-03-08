@@ -85,7 +85,8 @@ p {
   var myAudioContext;
   var oscillator;
   var osc2;
-  var gainNode;
+  var fqGainNode;
+  var stopperGainNode;
 
   // Notes
   var lowNote = 261.63; // C4
@@ -128,41 +129,47 @@ p {
   // Play a note
   SynthPad.playSound = function(event) {
     if (singleTouchBool) {
+      console.log("In first touch playSound")
       oscillator = myAudioContext.createOscillator();
       osc2 = myAudioContext.createOscillator();
-      gainNode = myAudioContext.createGainNode();
-
-      oscillator.type = 'triangle';
-      SynthPad.updateFrequency(event);
-
-      oscillator.connect(myAudioContext.destination);
-      oscillator.start(0);
-
-      gainNode.gain.value = 100;
-      gainNode.connect(oscillator.frequency);
-
       osc2.frequency.value = 5;
-      osc2.connect(gainNode);
+      oscillator.type = 'triangle';
+
+      fqGainNode = myAudioContext.createGainNode();
+
+      oscillator.start(0);
       osc2.start(0);
+
+      // Create gain node to control master volume
+      stopperGainNode = myAudioContext.createGainNode();
+
+      oscillator.connect(stopperGainNode);  
+      stopperGainNode.connect(myAudioContext.destination);
+
+      fqGainNode.gain.value = 100;
+      fqGainNode.connect(oscillator.frequency);
+      osc2.connect(fqGainNode);
+
       singleTouchBool = false;
+
+      
     } else {
+      console.log("In later touch playSound");
       // increase gain
+      stopperGainNode.gain.value = 1.0;
     }
+
+    SynthPad.updateFrequency(event);
 
     myCanvas.addEventListener('mousemove', SynthPad.updateFrequency);
     myCanvas.addEventListener('touchmove', SynthPad.updateFrequency);
     myCanvas.addEventListener('mouseout', SynthPad.stopSound);
   };
 
-  // Stop the audio
+  // Stop the audio by silencing it
   SynthPad.stopSound = function(event) {
-    oscillator.stop(0);
-    osc2.stop(0);
-    myCanvas.removeEventListener('mousemove', SynthPad.updateFrequency);
-    myCanvas.removeEventListener('touchmove', SynthPad.updateFrequency);
-    myCanvas.removeEventListener('mouseout', SynthPad.stopSound);
-    singleTouchBool = true;
-    // change to decreasing gain
+    console.log("stopSound");
+    stopperGainNode.gain.value = 0;
   };
 
   // Calculate note frequency
@@ -197,9 +204,6 @@ p {
 window.onload = function() {
   var synthPad = new SynthPad();
 }
-
-// Might be a problem caused by the iphone hack to get audio playing, starting an oscillator, "Uncaught InvalidStateError: Failed to execute 'stop' on 'OscillatorNode': cannot call stop more than once." 
-// Currently experiencing bug that fails to stop with too many touches
 
 </script>
 </html>
